@@ -1,0 +1,59 @@
+---
+title: "Comparaison"
+output: html_document
+---
+# Generer une matrice de distances 
+```{r}
+library(dplyr)
+
+villes <- function(n){
+  max_x <- 20
+  max_y <- 20
+  set.seed(123)
+  villes <- data.frame(id = 1:n, x = runif(n, max = max_x), y = runif(n, max = max_y))
+  return(villes)
+}
+
+distance <- function(n) {
+  return(as.matrix(stats::dist(select(villes(n), x, y), diag = TRUE, upper = TRUE)))
+}
+n=10000
+matrice_couts = distance(n)
+
+rownames(matrice_couts) <- NULL
+colnames(matrice_couts)<- NULL
+```
+
+# Nearest neighbor R
+```{r}
+couts_R=c()
+Start = Sys.time()
+for (i in 1:n)
+{
+  couts_R=c(couts_R,nearest_neighbor_R(matrice_couts,i)$Cout)
+}
+End = Sys.time()
+v_R=which.min(couts_R)
+C_R=nearest_neighbor_R(matrice_couts,v)$Cout
+print(C_R)
+print(End-Start)
+```
+
+# Nearest neighbor Cpp
+```{r}
+library(Rcpp)
+sourceCpp("C:/Users/Hicham/Desktop/rcpp.cpp")
+couts_cpp=c()
+Start = Sys.time()
+for (i in 0:(n-1))
+{
+  couts_cpp=c(couts_cpp,nearest_neighbor_cpp(matrice_couts,i))
+}
+End = Sys.time()
+
+v_cpp=which.min(couts_cpp)
+C_cpp=nearest_neighbor_cpp(matrice_couts,v-1)
+print(C_cpp)
+print(End-Start)
+```
+
